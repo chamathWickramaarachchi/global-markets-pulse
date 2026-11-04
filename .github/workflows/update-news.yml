@@ -1,1 +1,49 @@
+name: Update News
 
+# Runs every 5 minutes (GitHub may start it a few minutes late when busy),
+# and can also be started by hand from the Actions tab ("Run workflow").
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-news
+  cancel-in-progress: true
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Get the website code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the RSS reader
+        run: pip install feedparser==6.0.11
+
+      - name: Download the latest headlines
+        run: python scripts/fetch_news.py --out out/news.json
+
+      # The news file goes to a separate branch called "news-data" so the
+      # main website is not rebuilt every 5 minutes and history stays small.
+      - name: Publish news.json to the news-data branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd out
+          git init -q
+          git checkout -q -b news-data
+          git config user.name "news-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add news.json
+          git commit -q -m "News update $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" news-data
