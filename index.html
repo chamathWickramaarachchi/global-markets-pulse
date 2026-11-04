@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Global Markets Pulse - SL Version</title>
+  <meta name="description" content="Live global stock indices, commodities and world news headlines updated every 5 minutes.">
+  <meta name="theme-color" content="#060912">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060912'/%3E%3Cpath d='M8 38h12l6-16 10 26 6-14h14' fill='none' stroke='%2300e0b8' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ================= HEADER ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M6 38h12l6-16 10 26 6-14h18" /></svg>
+      <div>
+        <h1><span id="siteName">Global Markets Pulse</span><span class="ver" id="siteVer">SL Version</span></h1>
+        <p id="tagline" class="muted">Live markets · Commodities · Forex · World news</p>
+      </div>
+    </div>
+    <div class="top-meta">
+      <span class="live-pill"><span class="dot"></span>LIVE</span>
+      <div class="clock"><span class="clock-label" id="localLabel">Colombo</span><span class="clock-time mono" id="localClock">--:--:--</span></div>
+      <div class="clock"><span class="clock-label">UTC</span><span class="clock-time mono" id="utcClock">--:--:--</span></div>
+      <div class="clock hide-sm"><span class="clock-label">New York</span><span class="clock-time mono" id="nyClock">--:--</span></div>
+    </div>
+  </header>
+
+  <!-- Live price ticker (TradingView) -->
+  <div class="ticker-wrap"><div id="tickerTape" class="tv-slot" style="height:46px"></div></div>
+
+  <!-- Breaking headlines ticker -->
+  <div class="breaking">
+    <span class="breaking-label">HEADLINES</span>
+    <div class="breaking-track"><div class="breaking-inner" id="breakingInner"><span class="muted">Loading latest headlines…</span></div></div>
+  </div>
+
+  <main class="layout">
+    <!-- ================= MARKET SESSIONS ================= -->
+    <section class="sessions" id="sessions" aria-label="World market sessions"></section>
+
+    <!-- ================= SPOTLIGHT ================= -->
+    <section class="spotlight" id="spotlight" aria-label="Spotlight"></section>
+
+    <!-- ================= MARKETS + NEWS ================= -->
+    <div class="grid-main">
+      <section class="panel panel-quotes">
+        <div class="panel-head">
+          <div>
+            <h2>Global Markets</h2>
+            <p class="muted small">Live prices · indices, commodities &amp; currencies</p>
+          </div>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="indices" role="tab" aria-selected="true">Stock Indices</button>
+            <button class="tab" data-tab="commodities" role="tab" aria-selected="false">Commodities</button>
+            <button class="tab" data-tab="forex" role="tab" aria-selected="false">Forex</button>
+          </div>
+        </div>
+        <div class="tab-body">
+          <div id="quotes-indices" class="tv-slot quotes-slot"></div>
+          <div id="quotes-commodities" class="tv-slot quotes-slot" hidden></div>
+          <div id="quotes-forex" class="tv-slot quotes-slot" hidden></div>
+        </div>
+      </section>
+
+      <section class="panel panel-news" aria-label="World news">
+        <div class="panel-head news-head">
+          <div>
+            <h2>World &amp; Market News</h2>
+            <p class="muted small" id="newsStatus">Connecting to news feed…</p>
+          </div>
+          <div class="refresh" title="Time until next news refresh">
+            <svg viewBox="0 0 36 36" class="ring"><circle cx="18" cy="18" r="15.5" class="ring-bg"/><circle cx="18" cy="18" r="15.5" class="ring-fg" id="ringFg"/></svg>
+            <span class="mono" id="countdown">5:00</span>
+            <button class="icon-btn" id="refreshNow" aria-label="Refresh news now" title="Refresh now">
+              <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="news-tools">
+          <div class="chips" id="catChips"></div>
+          <div class="news-filters">
+            <input id="newsSearch" type="search" placeholder="Search headlines…  ( / )" autocomplete="off">
+            <select id="sourceSelect" aria-label="Filter by source"><option value="">All sources</option></select>
+          </div>
+        </div>
+        <div class="news-list" id="newsList" aria-live="polite">
+          <div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= CHART + CALENDAR ================= -->
+    <div class="grid-main">
+      <section class="panel panel-chart" id="chartPanel">
+        <div class="panel-head">
+          <div>
+            <h2>Advanced Chart</h2>
+            <p class="muted small">Pick an instrument or search any symbol inside the chart</p>
+          </div>
+          <button class="icon-btn" id="fullscreenBtn" aria-label="Full screen chart" title="Full screen">
+            <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+        </div>
+        <div class="chips chart-chips" id="chartChips"></div>
+        <div id="advancedChart" class="tv-slot chart-slot"></div>
+      </section>
+
+      <section class="panel panel-cal">
+        <div class="panel-head">
+          <div>
+            <h2>Economic Calendar</h2>
+            <p class="muted small">High-impact events · your local time</p>
+          </div>
+        </div>
+        <div id="ecoCalendar" class="tv-slot cal-slot"></div>
+      </section>
+    </div>
+
+    <!-- ================= HEATMAP ================= -->
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>S&amp;P 500 Heatmap</h2>
+          <p class="muted small">Sector map sized by market cap · coloured by today's change</p>
+        </div>
+      </div>
+      <div id="heatmap" class="tv-slot heat-slot"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><strong id="footName">Global Markets Pulse - SL Version</strong> · Market data &amp; charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a> · Headlines link to their original publishers.</p>
+    <p class="muted small">Index CFD prices are live; some exchange data is delayed by the exchange. Market hours exclude public holidays. For information only — not investment advice.</p>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
